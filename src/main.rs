@@ -42,6 +42,7 @@
 //!
 
 use clap::Parser;
+use colored::*;
 use rand::prelude::*;
 use std::cmp::*;
 use std::fmt;
@@ -127,9 +128,9 @@ impl FromStr for Throw {
 
 impl Throw {
     fn user(self) -> Self {
-        println!("You threw... {}", self);
+        println!("{} {}", "You threw...".purple().bold(), self);
         if matches!(self, Throw::Invalid) {
-            eprintln!("I'm not playing with you now.");
+            eprintln!("{}", "I'm not playing with you now.".red().bold());
             std::process::exit(1)
         }
         self
@@ -140,7 +141,7 @@ impl Throw {
         let r = [Throw::Rock, Throw::Paper, Throw::Scissors]
             .choose(&mut rng)
             .clone();
-        println!("Computer throws {}", r.unwrap());
+        println!("{} {}", "Computer throws".purple().bold(), r.unwrap());
         r.unwrap().to_owned()
     }
 }
@@ -152,9 +153,20 @@ fn play(a: Throw, b: Throw) -> GameResult {
         Ordering::Less => GameResult::YouLose,
     };
 
-    println!("Result: {result}");
+    println!("{} {}", "Result:".purple().bold(), result);
 
     result
+}
+
+fn lets_play() {
+    print!("\x1B[2J\x1B[1;1H"); // clear screen
+    println!(
+        "Let's {}{}{}{} 🪨🧻✂️!",
+        "p".red().bold(),
+        "l".green().bold(),
+        "a".yellow().bold(),
+        "y".blue().bold()
+    );
 }
 
 fn main() {
@@ -162,23 +174,26 @@ fn main() {
 
     match args.throw {
         Some(val) => {
-            print!("\x1B[2J\x1B[1;1H"); // clear screen
-            println!("Let's play 🪨🧻✂️!");
+            lets_play();
             let user = val.user();
             let computer = Throw::computer();
             play(user, computer);
             std::process::exit(0)
         }
         None => loop {
-            print!("\x1B[2J\x1B[1;1H"); // clear screen
-            println!("Let's play! 🪨🧻✂️");
-            println!("What do you throw?");
+            lets_play();
+            println!("{}", "What do you throw?".purple().bold());
             let mut user_input = String::new();
             std::io::stdin().read_line(&mut user_input).ok();
             let user = Throw::from_str(user_input.as_str()).unwrap().user();
             let computer = Throw::computer();
             play(user, computer);
-            println!("Press ENTER to play again, or anything else to quit");
+            println!(
+                "{}",
+                "Press ENTER to play again, or anything else to quit"
+                    .green()
+                    .bold()
+            );
             user_input = "".to_string();
             std::io::stdin().read_line(&mut user_input).ok();
             match &user_input.to_lowercase().trim_end()[..] {
